@@ -6,6 +6,8 @@
 //  Copyright © 2021 Vyacheslav Khorkov. All rights reserved.
 //
 
+import Files
+
 struct XcodeBuild {
     let project: String
     let scheme: String
@@ -15,11 +17,13 @@ struct XcodeBuild {
     let xcargs: [String]
 
     func build() throws {
+        let currentFolder = Folder.current.path
+            .replacingOccurrences(of: " ", with: "\\ ")
         var arguments = [
             "-project \(project)",
             "-scheme \(scheme)",
             "-sdk \(sdk.xcodebuild)",
-            "SYMROOT=\"$(PWD)/\(String.buildFolder)\""
+            "SYMROOT=\(currentFolder)\(String.buildFolder)"
         ]
         arguments.append(contentsOf: xcargs)
 
@@ -29,10 +33,10 @@ struct XcodeBuild {
         if let config = config {
             arguments.append("-config \(config)")
         }
-        arguments.append(" | tee " + .rawBuildLog)
+        arguments.append("| tee " + .rawBuildLog)
 
         try XcodeBuildRunner(rawLogPath: .rawBuildLog, logPath: .buildLog).run(
-            "set -o pipefail && NSUnbufferedIO=YES xcodebuild",
+            "NSUnbufferedIO=YES xcodebuild",
             args: arguments
         )
     }
