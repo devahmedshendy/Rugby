@@ -9,6 +9,7 @@
 extension String {
 
     // MARK: - Output
+
     static let finalMessage = "Let's roll 🏈".green
     static let separator = "---------------------------------".yellow
 
@@ -27,6 +28,11 @@ extension String {
 
     static let history = supportFolder + "/history"
 
+    // MARK: - Xcode Project Variables
+
+    static let rugbyPatched = "RUGBY_PATCHED"
+    static let yes: Any = "YES"
+
     // MARK: - Cache command
 
     static let defaultXcodeCLTPath = "/Library/Developer/CommandLineTools"
@@ -36,6 +42,9 @@ extension String {
     static let buildLog = supportFolder + "/build.log"
     static let buildFolder = supportFolder + "/build"
     static let cacheFile = supportFolder + "/cache.yml"
-    static let cacheFolder: String =
-        "${PODS_ROOT}/../" + supportFolder + "/build/${CONFIGURATION}${EFFECTIVE_PLATFORM_NAME}"
+
+    private static let cacheFolderName = "${CONFIGURATION}${EFFECTIVE_PLATFORM_NAME}"
+    static func cacheFolder(currentPath: String) -> String {
+        "\(currentPath)\(buildFolder)/\(cacheFolderName)"
+    }
 }

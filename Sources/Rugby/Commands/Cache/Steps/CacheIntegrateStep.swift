@@ -19,13 +19,16 @@ struct CacheIntegrateStep: Step {
         self.command = command
         self.verbose = command.flags.verbose
         self.isLast = isLast
-        self.progress = RugbyPrinter(title: "Integration", logFile: logFile, verbose: verbose)
+        self.progress = RugbyPrinter(title: "Integration",
+                                     logFile: logFile,
+                                     verbose: verbose,
+                                     quiet: command.flags.quiet)
     }
 
     func run(_ targets: Set<String>) throws {
-        try progress.spinner("Update paths to builded pods") {
-            try CacheIntegration(cacheFolder: .cacheFolder,
-                                 buildedTargets: targets).replacePathsToCache()
+        try progress.spinner("Update paths to built pods") {
+            try CacheIntegration(cacheFolder: .cacheFolder(currentPath: Folder.current.path),
+                                 builtTargets: targets).replacePathsToCache()
         }
         done()
     }

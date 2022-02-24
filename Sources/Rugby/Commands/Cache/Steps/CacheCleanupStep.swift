@@ -28,7 +28,7 @@ struct CacheCleanupStep: Step {
         self.metrics = metrics
         self.verbose = command.flags.verbose
         self.isLast = isLast
-        self.progress = RugbyPrinter(title: "Clean up", logFile: logFile, verbose: verbose)
+        self.progress = RugbyPrinter(title: "Clean up", logFile: logFile, verbose: verbose, quiet: command.flags.quiet)
     }
 
     func run(_ input: Input) throws {
@@ -59,18 +59,19 @@ struct CacheCleanupStep: Step {
             hasChanges = true
         }
 
-        progress.print("Remove builded pods".yellow, level: .vv)
-        var removeBuildedPods = project.removeDependencies(names: targets, exclude: command.exclude)
+        progress.print("Remove built pods".yellow, level: .vv)
+        var removeBuiltPods = project.removeDependencies(names: targets, exclude: command.exclude)
         targets.forEach {
-            removeBuildedPods = project.removeTarget(name: $0) || removeBuildedPods
+            removeBuiltPods = project.removeTarget(name: $0) || removeBuiltPods
         }
 
-        if hasChanges || removeBuildedPods {
+        if hasChanges || removeBuiltPods {
             // Remove schemes if has changes (it should be changes in targets)
             progress.print("Remove schemes".yellow, level: .vv)
             try project.removeSchemes(pods: targets, projectPath: .podsProject)
 
             try progress.spinner("Save project") {
+                project.pbxproj.main.set(buildSettingsKey: .rugbyPatched, value: String.yes)
                 try project.write(pathString: .podsProject, override: true)
             }
 
